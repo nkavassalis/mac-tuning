@@ -1,0 +1,9 @@
+F4-deep32-medium 43
+F4-deep32-xhigh 43
+FLINT-t0 60
+FLINT-t06 61
+FLINT-t10 57
+GF4-deep32-t06 44
+GF4-deep32-t10 50
+M-deep32-t06 50
+M-deep32-t10 50

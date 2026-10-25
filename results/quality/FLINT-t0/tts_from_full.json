@@ -1,0 +1,38 @@
+{
+ "HE+ full (164)": {
+  "n": 164,
+  "solved": 148,
+  "wall_s": 2748.5,
+  "s_per_problem": 16.8,
+  "s_per_solved": 18.6,
+  "mean_tokens": 1895,
+  "at_budget": 1
+ },
+ "HE+ TTS subset (every 4th)": {
+  "n": 41,
+  "solved": 37,
+  "wall_s": 1001.5,
+  "s_per_problem": 24.4,
+  "s_per_solved": 27.1,
+  "mean_tokens": 2555,
+  "at_budget": 1
+ },
+ "LCB full (80)": {
+  "n": 80,
+  "solved": 56,
+  "wall_s": 14871.7,
+  "s_per_problem": 185.9,
+  "s_per_solved": 265.6,
+  "mean_tokens": 16873,
+  "at_budget": 19
+ },
+ "LCB TTS subset (every 8th)": {
+  "n": 10,
+  "solved": 5,
+  "wall_s": 2689.9,
+  "s_per_problem": 269.0,
+  "s_per_solved": 538.0,
+  "mean_tokens": 24070,
+  "at_budget": 4
+ }
+}
