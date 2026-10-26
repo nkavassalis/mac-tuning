@@ -11,6 +11,7 @@
 #     full runs by tts_from_full.py instead of being generated twice (same requests, same seeds).
 #   - MBPP+ / GSM8K go through quality_eval.py gen with NOTHINK_KWARGS='{}' (no reasoning switch exists) and
 #     NOTHINK_TEMP=<temp> (top_k omitted, server default 20). NLL is skipped (rec has no prompt logprobs).
+# LCB_DATA: LCB problem file under data/ (default lcb80.jsonl; atc147.jsonl = the contamination set from atcoder_prep.py).
 # TASKS (default "humaneval lcb mbpp gsm8k"; at T=0 without gsm8k, see below) selects a subset. Everything is resumable: rerun to continue.
 set -uo pipefail
 T="${1:?usage: run_flint.sh <temp> <label>}"; L="${2:?usage: run_flint.sh <temp> <label>}"
@@ -39,8 +40,8 @@ if has humaneval; then
 fi
 if has lcb; then
   echo "=== $(date -u +%T) $L LCB"
-  "${NET[@]}" python3 deep_eval.py gen-think --task lcb --data /data/lcb80.jsonl --max-tokens "$MAX" --out "results/$L/lcb_think.jsonl"
-  "${BOX[@]}" python3 deep_eval.py lcb-exec --data /data/lcb80.jsonl --gen /out/lcb_think.jsonl | tee "$OUT/lcb_score.txt"
+  "${NET[@]}" python3 deep_eval.py gen-think --task lcb --data "/data/${LCB_DATA:-lcb80.jsonl}" --max-tokens "$MAX" --out "results/$L/lcb_think.jsonl"
+  "${BOX[@]}" python3 deep_eval.py lcb-exec --data "/data/${LCB_DATA:-lcb80.jsonl}" --gen /out/lcb_think.jsonl | tee "$OUT/lcb_score.txt"
 fi
 for t in mbpp gsm8k; do
   has $t || continue

@@ -1,0 +1,102 @@
+[
+ {
+  "task_id": "atc/abc466_c",
+  "why": "interactive"
+ },
+ {
+  "task_id": "atc/arc224_c",
+  "why": "any valid output"
+ },
+ {
+  "task_id": "atc/arc225_c",
+  "why": "any valid output"
+ },
+ {
+  "task_id": "atc/abc469_e",
+  "why": "error tolerance"
+ },
+ {
+  "task_id": "atc/abc470_e",
+  "why": "error tolerance"
+ },
+ {
+  "task_id": "atc/arc226_c",
+  "why": "any valid output"
+ },
+ {
+  "task_id": "atc/arc226_d",
+  "why": "interactive"
+ },
+ {
+  "task_id": "atc/arc226_e",
+  "why": "no samples"
+ },
+ {
+  "task_id": "atc/arc227_a",
+  "why": "any valid output"
+ },
+ {
+  "task_id": "atc/arc227_b",
+  "why": "any valid output"
+ },
+ {
+  "task_id": "atc/arc227_c",
+  "why": "any valid output"
+ },
+ {
+  "task_id": "atc/abc472_e",
+  "why": "any valid output"
+ },
+ {
+  "task_id": "atc/abc472_f",
+  "why": "error tolerance"
+ },
+ {
+  "task_id": "atc/arc228_d",
+  "why": "any valid output"
+ },
+ {
+  "task_id": "atc/arc229_a",
+  "why": "any valid output"
+ },
+ {
+  "task_id": "atc/abc474_a",
+  "why": "any valid output"
+ },
+ {
+  "task_id": "atc/abc474_g",
+  "why": "any valid output"
+ },
+ {
+  "task_id": "atc/abc475_d",
+  "why": "any valid output"
+ },
+ {
+  "task_id": "atc/abc475_g",
+  "why": "any valid output"
+ },
+ {
+  "task_id": "atc/abc478_e",
+  "why": "any valid output"
+ },
+ {
+  "task_id": "atc/arc231_b",
+  "why": "any valid output"
+ },
+ {
+  "task_id": "atc/arc231_d",
+  "why": "interactive"
+ },
+ {
+  "task_id": "atc/arc231_f",
+  "why": "any valid output"
+ },
+ {
+  "task_id": "atc/arc233_a",
+  "why": "interactive"
+ },
+ {
+  "task_id": "atc/arc233_d",
+  "why": "any valid output"
+ }
+]

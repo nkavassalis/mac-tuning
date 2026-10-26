@@ -4,10 +4,9 @@
 context) locally on a Mac. How fast is it, how good is it at code, and what does temperature do? And how does it compare with
 the models on the 2-node DGX Spark cluster in [spark-tuning](https://github.com/nkavassalis/spark-tuning)?
 
-**Status 2026-10-25:** the int4 suite under `rec` is done (speed; HumanEval+, MBPP+, GSM8K, LiveCodeBench and time to solve at
-T = 1.0 / 0.6 / 0). Next, queued (user's call, 2026-10-24): a community Q8_0 GGUF under llama.cpp, to see whether the 64 GB
-headroom buys quality (below, "Next: Q8_0"). Also planned: a contamination check on AtCoder problems newer than Flint's
-knowledge cutoff ("Testing for contamination").
+**Status 2026-10-26:** done. The int4 suite under `rec` (speed; HumanEval+, MBPP+, GSM8K, LiveCodeBench and time to solve at
+T = 1.0 / 0.6 / 0) and a contamination check (Flint int4 head to head with Qwen FP4-Local on 147 AtCoder problems newer than
+Flint's knowledge cutoff, "Testing for contamination"). The Q8_0 follow-up was dropped (user's call, 2026-10-25).
 
 ## Summary
 
@@ -15,6 +14,9 @@ knowledge cutoff ("Testing for contamination").
   problems spark-tuning uses, at a 32K thinking budget. At the same 32K budget the Spark models reach 48.8–58.8%. Flint at T=0.6
   beats every Spark run at 32K, paired: Qwen FP4-Local `medium` / `xhigh` (p<0.001), MiMo (p=0.006–0.007) and GLM FP4-Local
   (p≤0.002). At T=1.0 the gap to MiMo and GLM is not significant (p=0.11–0.18).
+- **The lead survives a contamination check, smaller.** On 147 AtCoder problems published after Flint's June 2026 cutoff (scored
+  on sample tests only), Flint 68.0% vs Qwen FP4-Local 53.7 / 53.1% (`medium` / `xhigh`, p≤0.0003). Flint dropped 8 points from
+  the old problems, Qwen under 1, so the old 80 overstate Flint by roughly 8 points; the lead shrinks from +22 to +15.
 - **Weaker on easy code.** HumanEval+ 88.4–91.5% vs Qwen FP4-Local `medium` 95.7% (p=0.039 against Flint's best run). MBPP+
   79.1–79.4%: ties Qwen's thinking-off run, below GLM FP4-Local `low` (83.6%, p=0.006), above MiMo thinking off (75.4%, p=0.044).
 - **Temperature: T=0.6 or T=0, not the model card's 1.0.** Every test but MBPP+ (79.1 vs 79.4) is equal or better at 0.6 than at 1.0,
@@ -151,14 +153,14 @@ because it finishes more answers before the cap. n=10 is small: against each Spa
 the other didn't and lost at most 1, p ≥ 0.125 on its own. The full-run LCB numbers (186–198 s per problem over all 80) say the
 same thing with more problems.
 
-## Why a "small" model on a small machine scores this well (theories, 2026-10-25; none tested yet)
+## Why a "small" model on a small machine scores this well (theories, 2026-10-25; only 5 tested)
 
 Written down after the suite finished, as candidate explanations. Each is labelled with the evidence it rests on; the last one
 could undo the others, and the next section is the test for it.
 
 1. **The hardware sets the speed, not the quality.** Answers come from the weights. The Mac only makes each answer take longer;
    the same checkpoint, quantization and sampling on a faster box would give the same answers sooner. What *could* cost quality
-   here is the int4 quantization, and Flint still came out on top (the Q8_0 run below measures how much int4 costs).
+   here is the int4 quantization, and Flint still came out on top (how much int4 costs is not measured; Q8_0 was dropped).
 2. **It isn't small.** 40B parameters in total hold the knowledge; only ~2.5B are active per token. The small active count is what
    makes it fast, not shallow. (Model card figures.)
 3. **It looks trained for exactly this kind of test.** LiveCodeBench is contest programming, which rewards models trained with
@@ -169,22 +171,30 @@ could undo the others, and the next section is the test for it.
 4. **It finishes its reasoning inside the budget.** All the models write about the same amount on LiveCodeBench (mean 14–19K
    tokens), but only 19–21 of Flint's 80 answers hit the 32K cap, against 28–36 for the Spark models. Qwen FP4-Local still hits
    32K on 36 problems, so part of its gap may be budget alone; a 64K rerun would show how much (not run).
-5. **Contamination: the main doubt.** The 80 problems are AtCoder contests from 2025-01-11 to 2025-04-06, 15 months before Flint's
+5. **Contamination: the main doubt.** *(Tested 2026-10-26, next section: partly. The lead holds on new problems, about 8 points smaller.)* The 80 problems are AtCoder contests from 2025-01-11 to 2025-04-06, 15 months before Flint's
    stated knowledge cutoff (June 2026, model card) and also before the Spark models' releases. A model whose training data
    includes these problems, their editorials or accepted solutions would score higher for that reason, and the newest model is
-   the most likely to have seen them. That would inflate 3 and 4, and nothing in this suite can tell it apart from skill.
+   the most likely to have seen them. That would inflate 3 and 4, and the original suite can't tell it apart from skill.
 
 Why it's fast *on a Mac* in particular: decode is limited by memory bandwidth. At 4 bits, 2.5B active parameters is roughly
 1.3–1.5 GB read per token; at the M4 Pro's 273 GB/s (Apple's spec) that's a ceiling around 180–200 tok/s, and it measures 114–120 at
 1K context (arithmetic estimate, not profiled). Prefill is limited by compute instead, where the Spark's GPU wins by 4–10×: hence a
 6–9 minute wait on a cold 100K-token prompt.
 
-### Testing for contamination: problems newer than Flint (planned, not run)
+### Testing for contamination: problems newer than Flint (run 2026-10-25/26)
 
 No public benchmark post-dates Flint's June 2026 cutoff: the newest LiveCodeBench release (v6) ends in April 2025, and AtCoder no
-longer publishes full test data. AtCoder ABC 466–481 (2026-07-04 to 2026-10-24) are all after the cutoff, and problems C–G of those
-16 contests give 80 problems, but only with the 1–4 sample tests in each statement. Samples-only scoring was checked on the current
-80 problems, where both exist, by rescoring every 32K run on the public tests alone:
+longer publishes full test data. So the test set was built from AtCoder itself (`scripts/atcoder_prep.py`): every problem of the 17
+ABCs (465–481) and 10 ARCs (224–233) held 2026-07-04 to 2026-10-25, English statement converted to LiveCodeBench's layout, scored
+on the 1–5 sample tests in each statement. 25 of 172 were dropped because exact-output scoring can't judge them (4 interactive, 3
+real-valued answers, 17 accepting any of several outputs, 1 without samples; each drop checked by hand,
+`results/quality/atc147-excluded.json`). That leaves **147 problems**: 33 easy / 33 medium / 81 hard by AtCoder score
+(≤200 / ≤400 / more), against lcb80's 16 / 18 / 46, so both sets are 55–58% hard. The statements themselves are AtCoder's and are
+not in this repo: `results/quality/atc147-problems.json` lists the problems, `atc147.sha256` the checksum of the scored file, and
+rerunning the script rebuilds it.
+
+**Calibration.** Samples-only scoring was first checked on the current 80 problems, where both exist, by rescoring every 32K run
+on the public tests alone:
 
 | Run (32K) | Full tests | Samples only |
 |---|---|---|
@@ -193,9 +203,50 @@ longer publishes full test data. AtCoder ABC 466–481 (2026-07-04 to 2026-10-24
 | MiMo T=1.0 / T=0.6 | 58.8 / 57.5 | 62.5 / 62.5 |
 | GLM FP4-Local `high` T=1.0 / T=0.6 | 58.8 / 48.8 | 62.5 / 55.0 |
 
-Samples-only reads 2.5–6 points high for every run and keeps the order, so it is fine for comparing models. The test: Flint's lead
-over Qwen FP4-Local on the new problems, against its samples-only lead on the old ones (+22 points, 76.2 vs 53.8). If the lead holds
-on problems nobody could have trained on, contamination isn't the explanation; if it collapses, it was.
+Samples-only reads 2.5–6 points high for every run and keeps the order, so it is fine for comparing models.
+
+**Run.** Flint int4 at T=0.6 (its best LCB setting), 32K, concurrency 1 on the Mac (8.4 h). Qwen FP4-Local on the Spark in the
+same configuration as its 32K reruns (K=2, PLE table in GPU memory, GMU 0.84) but locked with the API key so nothing else touched
+it, `medium` then `xhigh`, T=0.6, 32K, concurrency 8 (~4.5 h each). Same prompt, seeds and sandbox as LiveCodeBench.
+
+| Samples-only pass rate | Old: lcb80 (2025-01 to 04) | **New: atc147 (2026-07 to 10)** | Change |
+|---|---|---|---|
+| Flint int4, T=0.6 | 76.2% (61/80) | **68.0%** (100/147) | −8.2 |
+| Qwen FP4-Local `medium` | 53.8% (43/80) | **53.7%** (79/147) | −0.1 |
+| Qwen FP4-Local `xhigh` | 53.8% (43/80) | **53.1%** (78/147) | −0.7 |
+| Flint's lead over Qwen (mean of the two) | +22.4 | **+14.6** | −7.8 |
+| Hard problems only: Flint / Qwen mean | 63.0 / 30.4% (29, 14 of 46) | **45.7 / 24.7%** (37, 20 of 81) | lead +32.6 → +21.0 |
+
+On the new set, by stratum (solved / problems):
+
+| | easy (33) | medium (33) | hard (81) | ABC (109) | ARC (38) |
+|---|---|---|---|---|---|
+| Flint int4, T=0.6 | 33 | 30 | 37 | 88 | 12 |
+| Qwen `medium` | 33 | 25 | 21 | 72 | 7 |
+| Qwen `xhigh` | 33 | 26 | 19 | 69 | 9 |
+
+Paired on the 147 new problems, Flint beats both: vs `medium` 27 problems only Flint solved / 6 only Qwen solved, p=0.0003; vs
+`xhigh` 28 / 6, p=0.0002. Answers at the 32K cap: Flint 42 of 147, Qwen 66 / 67. Mean tokens 17,940 vs 19,230 / 19,509.
+
+**Reading.** Flint's lead **holds** on problems that appeared after its knowledge cutoff, and stays large and highly significant:
++14.6 points overall and +21 on hard problems. It is **smaller than on the old problems**, by about 8 points. Flint lost 8 points
+moving to the new problems while Qwen, on sets of the same difficulty mix, lost under 1. That pattern fits some contamination of the
+2025 problems in Flint's training data (or some other way the old set suited Flint specifically). It doesn't fit the old set simply
+being easier, since Qwen didn't move. So the 71.2% headline overstates Flint by something like 8 points, but contamination doesn't
+explain why Flint beats the Spark models. Theory 5 above is answered: partly.
+
+**Limits of this test:**
+- One run per model per set.
+- Samples-only tests are weaker than full tests.
+- The ~8-point drop compares two different problem sets, and its significance is **not tested**.
+- The difficulty labels are approximate: AtCoder score here, LiveCodeBench's own labels on lcb80.
+- Qwen is the only control. MiMo and GLM were not run on the new set: they are not on the head (2026-10-26).
+- Problems were dropped by keyword filters checked by hand. A remaining problem with several valid outputs would count a correct
+  answer as wrong for both models alike.
+
+Results: `results/quality/FLINT-atc-t06` here, [`F4-atc-medium`](https://github.com/nkavassalis/spark-tuning/tree/main/results/quality/F4-atc-medium) and
+[`F4-atc-xhigh`](https://github.com/nkavassalis/spark-tuning/tree/main/results/quality/F4-atc-xhigh) in spark-tuning. Breakdown:
+`scripts/strata.py <atc147.jsonl> <scored files>`.
 
 ## Flint on the Spark cluster: not run (user's call, 2026-10-25)
 
@@ -208,13 +259,11 @@ here**). TP=2 across both Sparks is unlikely to help: ~2.5B active parameters ma
 layer over the 200G link add a few ms (estimate), the model fits one node ~5× over, and Flint's fast kernels are TP=1-only
 ([vLLM blog](https://vllm.ai/blog/2026-10-21-flint)).
 
-## Next: Q8_0 (queued)
+## Q8_0: dropped (user's call, 2026-10-25)
 
-Goal (user's, 2026-10-24): does the 64 GB Mac's headroom buy quality? `rec` can't load 8-bit weights (its loader asserts 4-bit), and
-BF16 (79.6 GB) doesn't fit, so the candidate is a community Q8_0 GGUF (~42 GB) under a llama.cpp build that supports Flint, run
-through the same suite and compared paired against the int4 runs above. **Caveats to carry into that comparison:** the runtime
-changes with the quantization (llama.cpp vs MLX), so a difference can't be pinned on 8 bits alone; there's no Q4 llama.cpp control
-run; and Q8_0 is a community conversion, not an official release.
+Planned as the follow-up (does the 64 GB Mac's headroom buy quality?), then dropped before anything ran. Had it run: `rec` can't load
+8-bit weights (its loader asserts 4-bit) and BF16 (79.6 GB) doesn't fit, so it would have been a community Q8_0 GGUF (~42 GB) under
+llama.cpp, a change of runtime as well as of bit width. How much int4 costs Flint is therefore **not measured**.
 
 ## Caveats / not measured
 

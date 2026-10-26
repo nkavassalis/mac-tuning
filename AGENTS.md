@@ -8,8 +8,8 @@ Public notes, scripts and measured results from running Recursive **Flint** (40B
 [spark-tuning](https://github.com/nkavassalis/spark-tuning), whose quality harness (`quality/`) and decode benchmark
 (`spark-tuning/scripts/bench_decode.py`) are reused unmodified so the numbers line up with the Spark models.
 - Flint int4 under `rec` 0.1.0: set up and benchmarked 2026-10-24/25 (speed, quality and time to solve at T = 1.0 / 0.6 / 0): `FLINT.md`.
-- Queued after the int4 suite (user's call, 2026-10-24): community **Q8_0 GGUF** under llama.cpp, to see whether the 64 GB headroom
-  buys quality. `rec` can't load 8-bit weights (its loader asserts 4-bit). BF16 (79.6 GB) does not fit.
+- Contamination check (2026-10-25): Flint int4 vs Qwen FP4-Local on 147 post-cutoff AtCoder problems (`scripts/atcoder_prep.py`,
+  samples-only scoring), FLINT.md "Testing for contamination". The Q8_0 follow-up was dropped (user's call, 2026-10-25).
 Goal: is a 64 GB Mac a credible single-user coding-agent server, and how does it compare with the 2-node Spark cluster?
 
 ## THE PUBLIC RULE (read first)
@@ -34,6 +34,8 @@ and inspect every hit (`scripts/check_repo.py` runs the same scan over the tree)
 | `scripts/run_flint.sh` | on the worker: the full quality suite at one temperature, 32K budget, concurrency 1 |
 | `scripts/tts_from_full.py` | time-to-solve subsets cut from the concurrency-1 full runs; budget-hit counts |
 | `scripts/paired.py` | paired McNemar test (evalplus `*_eval_results.json` and LCB `*_scored.json`) |
+| `scripts/atcoder_prep.py` | contamination set: post-cutoff ABC/ARC problems -> LCB-format jsonl (samples as tests; drops interactive, tolerance, any-answer) |
+| `scripts/strata.py` | LCB pass rates by difficulty / contest / letter |
 | `scripts/matrix.sh` | the whole matrix from here: speed bench, then `run_flint.sh` at each temperature |
 | `scripts/check_repo.py` | offline: leak scan, paths named in docs exist |
 | `LICENSE` | MIT |
