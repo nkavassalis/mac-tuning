@@ -38,7 +38,7 @@ Flint's knowledge cutoff, "Testing for contamination"). The Q8_0 follow-up was d
 
 ## Setup
 
-Hardware: Mac mini, Apple M4 Pro, 64 GB unified memory, macOS 27.0.1. High Power mode on (`pmset powermode 2`, set by the user; Automatic measures the same, see "Power modes"), system
+Hardware: Mac mini, Apple M4 Pro, 64 GB unified memory, macOS 27.0.1. High Power mode (`pmset powermode 2`, set by the user) for every run before 2026-10-29; Automatic since then (measures the same, see "Power modes"), system
 sleep off (`caffeinate`), the earlier oMLX server and its model removed (2026-10-24). Nothing else runs on it.
 
 Server: `rec` 0.1.0, installed with Recursive's one-liner

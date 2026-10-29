@@ -82,7 +82,7 @@ bash -n scripts/*.sh; python3 -m py_compile scripts/*.py
   `--metrics <jsonl>`. Logging only; no serving setting differs.
 - **Mac power**: High Power mode, sleep disabled, the earlier oMLX server and its model removed (2026-10-24). Power modes measured
   2026-10-29 (FLINT.md "Power modes"): Automatic = High Power in speed and watts. Low Power is ~1.5× slower at a third of the power.
-  The Mac is still in High Power (2026-10-29).
+  Switched to Automatic (`pmset -a powermode 0`) on 2026-10-29, the user's call.
 
 ## Conventions
 - Every number in the docs is measured, with the result file next to it. Label anything unmeasured as unmeasured.
