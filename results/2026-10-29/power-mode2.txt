@@ -1,0 +1,10 @@
+     ctx temp task        ptok  TTFT s  tok/s acc.len  per-pos acceptance
+-------------------------------------------------------------------------
+   1,000  0.0 code         823    1.22  119.8     n/a  n/a
+   1,000  0.0 edit         998    1.48  118.9     n/a  n/a
+  16,000  0.0 code      12,823   21.05   90.7     n/a  n/a
+  16,000  0.0 edit      15,414   27.49   85.9     n/a  n/a
+  64,000  0.0 code      51,223  128.58   50.9     n/a  n/a
+  64,000  0.0 edit      61,630  169.58   45.4     n/a  n/a
+
+wrote results/2026-10-29/power-mode2.json

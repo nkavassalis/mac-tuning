@@ -1,0 +1,3 @@
+powermode 1: idle 204 mW, average over the bench 8579 mW
+powermode 0: idle 584 mW, average over the bench 24736 mW
+powermode 2: idle 585 mW, average over the bench 24496 mW

@@ -1,0 +1,83 @@
+{
+ "label": "flint-int4-powermode2",
+ "thinking": "default",
+ "chat_kwargs": null,
+ "url": "http://<mac>:11502",
+ "time": "2026-10-29 15:23:29",
+ "decode_tokens": 1000,
+ "repeats": 1,
+ "rows": [
+  {
+   "context": 1000,
+   "temp": 0.0,
+   "task": "code",
+   "prompt_tokens": 823,
+   "decode_tok_s": 119.80403135443889,
+   "all_decode_tok_s": [
+    119.80403135443889
+   ],
+   "ttft_s": 1.2230079174041748,
+   "acceptance": null
+  },
+  {
+   "context": 1000,
+   "temp": 0.0,
+   "task": "edit",
+   "prompt_tokens": 998,
+   "decode_tok_s": 118.85623851978784,
+   "all_decode_tok_s": [
+    118.85623851978784
+   ],
+   "ttft_s": 1.4836187362670898,
+   "acceptance": null
+  },
+  {
+   "context": 16000,
+   "temp": 0.0,
+   "task": "code",
+   "prompt_tokens": 12823,
+   "decode_tok_s": 90.67354388376432,
+   "all_decode_tok_s": [
+    90.67354388376432
+   ],
+   "ttft_s": 21.054457902908325,
+   "acceptance": null
+  },
+  {
+   "context": 16000,
+   "temp": 0.0,
+   "task": "edit",
+   "prompt_tokens": 15414,
+   "decode_tok_s": 85.89000824030535,
+   "all_decode_tok_s": [
+    85.89000824030535
+   ],
+   "ttft_s": 27.49040389060974,
+   "acceptance": null
+  },
+  {
+   "context": 64000,
+   "temp": 0.0,
+   "task": "code",
+   "prompt_tokens": 51223,
+   "decode_tok_s": 50.89900406618947,
+   "all_decode_tok_s": [
+    50.89900406618947
+   ],
+   "ttft_s": 128.57971167564392,
+   "acceptance": null
+  },
+  {
+   "context": 64000,
+   "temp": 0.0,
+   "task": "edit",
+   "prompt_tokens": 61630,
+   "decode_tok_s": 45.433425385115456,
+   "all_decode_tok_s": [
+    45.433425385115456
+   ],
+   "ttft_s": 169.57730197906494,
+   "acceptance": null
+  }
+ ]
+}

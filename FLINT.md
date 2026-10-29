@@ -38,7 +38,7 @@ Flint's knowledge cutoff, "Testing for contamination"). The Q8_0 follow-up was d
 
 ## Setup
 
-Hardware: Mac mini, Apple M4 Pro, 64 GB unified memory, macOS 27.0.1. High Power mode on (`pmset powermode 2`, set by the user), system
+Hardware: Mac mini, Apple M4 Pro, 64 GB unified memory, macOS 27.0.1. High Power mode on (`pmset powermode 2`, set by the user; Automatic measures the same, see "Power modes"), system
 sleep off (`caffeinate`), the earlier oMLX server and its model removed (2026-10-24). Nothing else runs on it.
 
 Server: `rec` 0.1.0, installed with Recursive's one-liner
@@ -85,6 +85,28 @@ are full attention over the whole prompt; prefill falls for the same reason. For
 FP4LOCAL.md): **Flint on the Mac decodes faster up to ~16K and slower by 64K, and prefills 4–10× slower.**
 
 The engine's own decode rate (from `--metrics`) agrees: 94–115 tok/s on the quality runs, lower on the longest answers.
+
+## Power modes (2026-10-29, `scripts/power_modes.sh`)
+
+The same bench (`code` and `edit`, temperature 0, 1,000 decode tokens, 1K / 16K / 64K) was run once in each macOS power mode
+(`sudo pmset -a powermode`: 1 = Low Power, 0 = Automatic, 2 = High Power), through the LAN relay, with nothing else on the Mac.
+Power is powermetrics' "Combined Power" (CPU + GPU + ANE, not DRAM or the whole box): a 20 s idle sample after the mode switch,
+then the average over the whole bench (`results/2026-10-29/power-mode{1,0,2}.{txt,json}`, `power-modes.txt`).
+
+| Mode | Decode tok/s 1K | 16K | 64K | TTFT 64K | Idle | Average under the bench | Bench energy (estimate) |
+|---|---|---|---|---|---|---|---|
+| Low Power (1) | 73–81 | 59–63 | 29–33 | 193–275 s | 0.20 W | **8.6 W** | ~5.7 kJ over ~660 s |
+| Automatic (0) | 120 | 87–91 | 45–50 | 129–170 s | 0.58 W | 24.7 W | ~10.6 kJ over ~430 s |
+| High Power (2) | 119–120 | 86–91 | 45–51 | 129–170 s | 0.59 W | 24.5 W | ~10.6 kJ over ~430 s |
+
+- **Automatic and High Power are the same here**: speed within 1.5%, power within 1%, idle the same. The 2026-10-24 High Power speed
+  table above (through the tunnel) matches both.
+- **Low Power is ~1.5× slower** at decode and prefill alike (decode −32 to −35%, time to first token +45–62%). It draws about a third
+  of the power, so it does the same work on about half the energy.
+- **Idle cost is small in every mode** (0.2–0.6 W for CPU + GPU). High Power does not burn power while Flint waits for a request.
+- Energy is power × the bench's duration (summed TTFT plus decode time), an estimate. Each mode was run once, and each bench took
+  7–11 minutes. That is not long enough to show where High Power should differ from Automatic: sustained clocks and fan curve under
+  long thermal load. Not measured.
 
 ## Memory and KV cache (engine `--metrics`, 2026-10-24/25)
 
