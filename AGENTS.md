@@ -30,6 +30,9 @@ and inspect every hit (`scripts/check_repo.py` runs the same scan over the tree)
 | `FLINT.md` | Flint int4 write-up: setup, memory/KV, speed, quality and time to solve per temperature, vs the Spark models |
 | `mac.env.example` | template for the untracked `mac.env` (MAC, MAC_KEY, WORKER, SPARK) |
 | `scripts/serve.sh` | run on the Mac: the exact `rec serve` command line plus `--metrics` (per-request engine JSONL) |
+| `scripts/install_launchd.sh [--uninstall]` | run on the Mac: Flint (`rec serve`, same command line as `serve.sh`) and the LAN relay as user LaunchAgents, started at boot and restarted if they exit |
+| `scripts/flint_relay.py` | stdlib TCP relay, LAN `:11502` -> `127.0.0.1:11500` (rec binds loopback only); copied to `~/mac-tuning-svc/` on the Mac |
+| `scripts/power_modes.sh` | decode speed and CPU+GPU power in each macOS power mode (`pmset powermode` 1 / 0 / 2), through the relay |
 | `scripts/tunnel_keep.sh` | self-healing two-leg SSH tunnel: Mac 127.0.0.1:11500 -> here :11501 -> worker 127.0.0.1:11500 (nothing on the LAN) |
 | `scripts/run_flint.sh` | on the worker: the full quality suite at one temperature, 32K budget, concurrency 1 |
 | `scripts/tts_from_full.py` | time-to-solve subsets cut from the concurrency-1 full runs; budget-hit counts |
@@ -44,7 +47,9 @@ and inspect every hit (`scripts/check_repo.py` runs the same scan over the tree)
 ## How to run
 ```bash
 cp mac.env.example mac.env                         # fill in (never commit)
-ssh -i "$MAC_KEY" "$MAC" 'bash -s' < scripts/serve.sh   # (re)start rec serve with --metrics
+scp scripts/flint_relay.py "$MAC":mac-tuning-svc/          # once (mkdir -p ~/mac-tuning-svc on the Mac)
+ssh -i "$MAC_KEY" "$MAC" 'bash -s' < scripts/install_launchd.sh   # Flint + relay as LaunchAgents (start at boot)
+# or, without launchd: ssh -i "$MAC_KEY" "$MAC" 'bash -s' < scripts/serve.sh   (one-off rec serve with --metrics)
 scripts/tunnel_keep.sh &                           # keep the tunnel up
 scp scripts/run_flint.sh scripts/tts_from_full.py "$WORKER":mac-quality/   # + the API key in ~/mac-quality/flint_key
 scripts/matrix.sh                                  # speed, then quality at TEMPS="1.0 0.6 0"
@@ -65,7 +70,14 @@ bash -n scripts/*.sh; python3 -m py_compile scripts/*.py
 - **Concurrency 1**: `rec` runs one generation at a time (admission queue of 9, then 429), so parallel requests only queue; at 1 every
   request's wall clock is a time-to-solve sample.
 - **Harness runs on the Spark worker, through a tunnel**: it has docker, the image, the data and the sandbox already; the Mac serves only.
-  The tunnel binds loopback on all three hops so the API is never exposed on the LAN.
+  The tunnel binds loopback on all three hops so the API is never exposed on the LAN. **Superseded 2026-10-29:** Flint now also
+  serves the LAN through `scripts/flint_relay.py` (`:11502`) so pi on another machine can call it (the private pi-escalation
+  repo). rec's API key still guards every request (401 without it), but the traffic is plain HTTP, so anyone who can read LAN
+  traffic can read the key. The benchmarks above all ran through the tunnel.
+- **launchd, not nohup** (2026-10-29): `scripts/install_launchd.sh` installs `local.flint.serve` and `local.flint.relay` in
+  `~/Library/LaunchAgents` with `RunAtLoad` + `KeepAlive`. They are user agents, so they start when the user logs in, and the
+  Mac logs in automatically at boot. No root is needed. Logs go to `~/mac-tuning-logs/{serve,relay}.log`. The relay runs on the
+  system `/usr/bin/python3`, Flint on rec's bundled Python.
 - **`--metrics`**: `rec serve` has no metrics flag, so `scripts/serve.sh` launches the same `rec_mlx` command `rec serve` runs, plus
   `--metrics <jsonl>`. Logging only; no serving setting differs.
 - **Mac power**: High Power mode, sleep disabled, the earlier oMLX server and its model removed (2026-10-24).

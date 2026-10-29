@@ -28,6 +28,8 @@ significant (p≤0.0003), so contamination inflates the LiveCodeBench number som
 | [FLINT.md](FLINT.md) | setup, speed, memory/KV, quality and time to solve at T = 1.0 / 0.6 / 0, comparison with the Spark models, contamination check |
 | [AGENTS.md](AGENTS.md) | rules for working on this repo (public: no hosts, IPs, users, keys), design decisions |
 | `scripts/serve.sh` | the exact `rec serve` launch plus `--metrics` (run on the Mac) |
+| `scripts/install_launchd.sh` | Flint + a LAN relay (`scripts/flint_relay.py`, `:11502`) as LaunchAgents that start at boot (run on the Mac) |
+| `scripts/power_modes.sh` | decode speed and power in Low Power / Automatic / High Power mode |
 | `scripts/tunnel_keep.sh` | loopback-only SSH tunnel from the Mac to the box that runs the harness |
 | `scripts/run_flint.sh` | the whole quality suite at one temperature (runs next to spark-tuning's harness) |
 | `scripts/tts_from_full.py` | time-to-solve subsets cut from the concurrency-1 runs |
@@ -45,6 +47,9 @@ ssh -i "$MAC_KEY" "$MAC" 'bash -s' < scripts/serve.sh     # rec installed on the
 scripts/tunnel_keep.sh &
 scripts/matrix.sh                                        # speed, then TEMPS="1.0 0.6 0"
 ```
+To keep Flint serving across reboots and reachable on the LAN instead (2026-10-29), copy `scripts/flint_relay.py` to
+`~/mac-tuning-svc/` on the Mac and run `scripts/install_launchd.sh` there the same way (AGENTS.md "Design decisions").
+
 The harness side needs a Linux box with docker and spark-tuning's `quality/` set up (its README "Tests" and `quality/` scripts).
 
 ## License
